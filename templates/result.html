@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap & Custom CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-light">
+<div class="container mt-5 animated-form">
+    <h2 class="text-center text-success mb-4 animated-title">Prediction Result</h2>
+
+    <div class="card shadow p-4">
+        <!-- Patient Info -->
+        <div class="mb-3">
+            <p><strong>Patient Name:</strong> {{ name }}</p>
+            <p><strong>Age:</strong> {{ age }}</p>
+            <p><strong>Gender:</strong> {{ gender }}</p>
+            <p><strong>Selected Symptoms:</strong> {{ selected_symptoms | join(', ') }}</p>
+        </div>
+
+        <!-- Predictions -->
+        <h4 class="text-primary mb-3">Top 3 Predicted Diseases:</h4>
+        <ol class="mb-3">
+            {% for disease, score in top_diseases %}
+                {% set confidence_class = (
+                    'high-confidence' if score >= 80 else
+                    'medium-confidence' if score >= 60 else
+                    'low-confidence'
+                ) %}
+                <li>
+                    <strong>{{ disease }}</strong>
+                    <span class="text-muted ml-2">{{ score }}%</span>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar {{ confidence_class }}" data-score="{{ score }}"></div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+
+        {% if top_diseases[0][1] < 60 %}
+        <div class="alert alert-warning mt-3">
+            <strong>⚠️ Low Confidence:</strong> Prediction confidence is only {{ top_diseases[0][1] }}%. Please double-check the symptoms or consult a doctor.
+        </div>
+        {% endif %}
+
+        <!-- Disease & Suggestions -->
+        <hr>
+        <h4 class="text-danger disease-title" id="diseaseText">Most Likely Disease: {{ disease }}</h4>
+        <p><strong>Description:</strong> <span id="descriptionText">{{ description }}</span></p>
+        <button class="btn btn-outline-secondary btn-sm mb-3" onclick="speakResult()">🔊 Read Aloud</button>
+
+        <h5 class="mt-3">Recommended Precautions:</h5>
+        <ul>
+            {% for p in precautions %}
+            <li>{{ p }}</li>
+            {% endfor %}
+        </ul>
+
+        <h5>Recommended Medicines:</h5>
+        <ul>
+            {% for med in medicines %}
+            <li>{{ med }}</li>
+            {% endfor %}
+        </ul>
+
+        <h5>Recommended Medical Tests:</h5>
+        <ul>
+            {% for test in tests %}
+            <li>{{ test }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between mt-4">
+            <a href="/" class="btn btn-secondary">← Back to Home</a>
+            <a href="/download_pdf" class="btn btn-success">⬇️ Download PDF Report</a>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+    // Speak disease + description
+    function speakResult() {
+        const disease = document.getElementById('diseaseText').innerText;
+        const description = document.getElementById('descriptionText').innerText;
+        const text = `${disease}. ${description}`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Dynamically set confidence bar width
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.confidence-bar').forEach(bar => {
+            const score = parseFloat(bar.dataset.score);
+            bar.style.width = score + '%';
+        });
+    });
+</script>
+</body>
+</html>
