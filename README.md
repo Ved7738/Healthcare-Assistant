@@ -33,9 +33,6 @@ healthcare_app/
 ├── requirements.txt
 └── README.md
 
-r
-Copy
-Edit
 
 ## Setup Instructions
 
