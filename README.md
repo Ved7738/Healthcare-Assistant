@@ -38,7 +38,7 @@ healthcare_app/
 
 1. Clone the repository:
     ```
-    git clone https://github.com/yourusername/healthcare-assistant.git
+    git clone https://github.com/Ved7738/healthcare-assistant.git
     cd healthcare-assistant
     ```
 
